@@ -14,6 +14,10 @@ app.use(
   })
 );
 
+app.get("/",(req,res)=>{
+  res.send("Stripe Payment Gateway Integrated")
+})
+
 app.get(`/api/v1/get_intents`, async (req, res) => {
   try {
     const paymentIntent = await stripe.paymentIntents.list({ limit: 10 });
