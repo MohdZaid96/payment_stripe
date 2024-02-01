@@ -18,7 +18,18 @@ app.get("/",(req,res)=>{
   res.send("Stripe Payment Gateway Integrated")
 })
 
-app.get(`/api/v1/get_intents`, async (req, res) => {
+const authentication=(req,res,next)=>{
+  const secretKey=req.header.authorization?.split(" ")[1];
+  if(!secretKey){
+    res.status(500).json("Invalid SecretKey");
+
+  }else{
+    next();
+  }
+
+}
+
+app.get(`/api/v1/get_intents`,authentication ,async (req, res) => {
   try {
     const paymentIntent = await stripe.paymentIntents.list({ limit: 10 });
     res.status(200).json({ paymentIntent, msg: "Payment Intent Fetched" });
@@ -27,7 +38,7 @@ app.get(`/api/v1/get_intents`, async (req, res) => {
   }
 });
 //Create intent for payment
-app.post(`/api/v1/create_intent`, async (req, res) => {
+app.post(`/api/v1/create_intent`,authentication , async (req, res) => {
   try {
     const paymentIntent = await stripe.paymentIntents.create(req.body);
     res.status(200).json({ paymentIntent, msg: "Payment Intent Created" });
@@ -36,7 +47,7 @@ app.post(`/api/v1/create_intent`, async (req, res) => {
   }
 });
 //Capture the created intent
-app.post(`/api/v1/capture_intent/:id`, async (req, res) => {
+app.post(`/api/v1/capture_intent/:id`,authentication , async (req, res) => {
   try {
     const { id } = req.params;
     console.log(req);
@@ -51,7 +62,7 @@ app.post(`/api/v1/capture_intent/:id`, async (req, res) => {
 });
 
 //Create a refund for the created intent
-app.post(`/api/v1/create_refund/:id`, async (req, res) => {
+app.post(`/api/v1/create_refund/:id`,authentication , async (req, res) => {
   try {
     const refund = await stripe.refunds.create({
       charge: req.body.charge,
